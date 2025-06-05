@@ -1,5 +1,11 @@
 package com.mybank.tui;
 
+import com.mybank.domain.Account;
+import com.mybank.domain.Bank;
+import com.mybank.domain.Customer;
+import com.mybank.domain.CheckingAccount;
+import com.mybank.domain.SavingsAccount;
+
 import jexer.TAction;
 import jexer.TApplication;
 import jexer.TField;
@@ -60,19 +66,32 @@ public class TUIdemo extends TApplication {
     }
 
     private void ShowCustomerDetails() {
+        Bank.addCustomer("Oleksandr", "Narikov");
+        Bank.addCustomer("David", "Goggins");
+
+        Bank.getCustomer(0).addAccount(new CheckingAccount(120.0));
+        Bank.getCustomer(1).addAccount(new SavingsAccount(420.2, 0.2));
+
         TWindow custWin = addWindow("Customer Window", 2, 1, 40, 10, TWindow.NOZOOMBOX);
         custWin.newStatusBar("Enter valid customer number and press Show...");
 
         custWin.addLabel("Enter customer number: ", 2, 2);
         TField custNo = custWin.addField(24, 2, 3, false);
         TText details = custWin.addText("Owner Name: \nAccount Type: \nAccount Balance: ", 2, 4, 38, 8);
+        
         custWin.addButton("&Show", 28, 2, new TAction() {
             @Override
             public void DO() {
                 try {
                     int custNum = Integer.parseInt(custNo.getText());
-                    //details about customer with index==custNum
-                    details.setText("Owner Name: John Doe (id="+custNum+")\nAccount Type: 'Checking'\nAccount Balance: $200.00");
+                    Customer customer = Bank.getCustomer(custNum);
+                    
+                    Account acc = customer.getAccount(0);
+
+                    details.setText("Customer: " + customer.getFirstName() + customer.getLastName()
+                            + "\nAccount type: " + acc.getAccType()
+                            + "\nBalance: " + acc.getBalance());
+
                 } catch (Exception e) {
                     messageBox("Error", "You must provide a valid customer number!").show();
                 }
